@@ -5,29 +5,26 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.google.devrel.training.conference.form.ProfileForm.TeeShirtSize;
+import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
 // TODO indicate that this class is an Entity
 @Entity
+@Cache
 public class Profile {
 	String displayName;
 	String mainEmail;
 	TeeShirtSize teeShirtSize;
 
-	private List<String> conferenceKeysToAttend = new ArrayList<>(0);
-
 	// TODO indicate that the userId is to be used in the Entity's key
 	@Id
 	String userId;
 
-	public List<String> getConferenceKeysToAttend() {
-		return ImmutableList.copyOf(conferenceKeysToAttend);
-	}
-
-	public void addToConferenceKeysToAttend(String conferenceKey) {
-		conferenceKeysToAttend.add(conferenceKey);
-	}
+	/**
+	 * Keys of the conferences that this user registers to attend.
+	 */
+	private List<String> conferenceKeysToAttend = new ArrayList<>(0);
 
 	/**
 	 * Public constructor for Profile.
@@ -40,7 +37,7 @@ public class Profile {
 	 *            User's main e-mail address.
 	 * @param teeShirtSize
 	 *            The User's tee shirt size
-	 * 
+	 *
 	 */
 	public Profile(String userId, String displayName, String mainEmail, TeeShirtSize teeShirtSize) {
 		this.userId = userId;
@@ -66,17 +63,47 @@ public class Profile {
 	}
 
 	/**
+	 * Getter for conferenceIdsToAttend.
+	 * 
+	 * @return an immutable copy of conferenceIdsToAttend.
+	 */
+	public List<String> getConferenceKeysToAttend() {
+		return ImmutableList.copyOf(conferenceKeysToAttend);
+	}
+
+	/**
 	 * Just making the default constructor private.
 	 */
 	private Profile() {
 	}
 
+	/**
+	 * Update the Profile with the given displayName and teeShirtSize
+	 *
+	 * @param displayName
+	 * @param teeShirtSize
+	 */
 	public void update(String displayName, TeeShirtSize teeShirtSize) {
-		if (displayName != null)
+		if (displayName != null) {
 			this.displayName = displayName;
-		if (teeShirtSize != null)
+		}
+		if (teeShirtSize != null) {
 			this.teeShirtSize = teeShirtSize;
+		}
+	}
 
+	/**
+	 * Adds a ConferenceId to conferenceIdsToAttend.
+	 *
+	 * The method initConferenceIdsToAttend is not thread-safe, but we need a
+	 * transaction for calling this method after all, so it is not a practical
+	 * issue.
+	 *
+	 * @param conferenceKey
+	 *            a websafe String representation of the Conference Key.
+	 */
+	public void addToConferenceKeysToAttend(String conferenceKey) {
+		conferenceKeysToAttend.add(conferenceKey);
 	}
 
 	/**
